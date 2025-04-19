@@ -9,6 +9,7 @@
  */
 
 import { Flashcard, AnswerDifficulty, BucketMap } from "./flashcards";
+import { PracticeRecord,ProgressStats } from "@models/index";
 
 /**
  * Converts a Map representation of learning buckets into an Array-of-Set representation.
@@ -171,56 +172,41 @@ export function update(
  *   - `correctnessRate`: The percentage of correct answers out of total answers.
  */
 export function computeProgress(
-  buckets: Map<number, Set<Flashcard>>, 
-  history: { [cardId: string]: AnswerDifficulty }
-): { 
-  totalCards: number; 
-  masteredCards: number; 
-  progress: number; 
-  totalCorrect: number; 
-  totalAnswered: number; 
-  correctnessRate: number; 
-} {
-  let totalCards = 0;
-  let masteredCards = 0;
-  let totalCorrect = 0;
-  let totalAnswered = 0;
-
-  // Iterate over all the buckets to calculate statistics
-  buckets.forEach((flashcards, bucketNum) => {
-    totalCards += flashcards.size; // Count the total number of flashcards
-
-    flashcards.forEach((flashcard) => {
-      const cardHistory = history[flashcard.front];
-      if (cardHistory !== undefined) {
-        totalAnswered++; // Increment totalAnswered for each practiced flashcard
-
-        // Count mastered flashcards (those in the highest bucket)
-        if (bucketNum === buckets.size - 1) {
-          masteredCards++;
-        }
-
-        // Count correct answers (Easy difficulty)
-        if (cardHistory === AnswerDifficulty.Easy) {
-          totalCorrect++;
-        }
-      }
-    });
-  });
-
-  // Calculate progress as the percentage of mastered flashcards
-  const progress = totalCards > 0 ? (masteredCards / totalCards) * 100 : 0;
-
-  // Calculate correctness rate as the percentage of correct answers
-  const correctnessRate = totalAnswered > 0 ? (totalCorrect / totalAnswered) * 100 : 0;
-
-  // Return the statistics object
-  return {
-    totalCards,
-    masteredCards,
-    progress,
-    totalCorrect,
-    totalAnswered,
-    correctnessRate
-  };
-}
+    buckets: BucketMap,
+    history: PracticeRecord[]
+  ): ProgressStats {
+    // Total number of cards across all buckets
+    const totalCards = Array.from(buckets.values())
+      .reduce((sum, bucket) => sum + bucket.size, 0);
+  
+    // Number of cards in the highest bucket (considered "mastered")
+    const highestBucketIndex = buckets.size - 1;
+    const masteredCards = buckets.get(highestBucketIndex)?.size ?? 0;
+  
+    // Total number of practice trials done
+    const totalAnswered = history.length;
+  
+    // Total number of times the user answered "Easy"
+    const totalCorrect = history.filter(
+      (rec) => rec.difficulty === AnswerDifficulty.Easy
+    ).length;
+  
+    // Percentage of cards mastered
+    const progress = totalCards > 0
+      ? (masteredCards / totalCards) * 100
+      : 0;
+  
+    // Percentage of correct responses
+    const correctnessRate = totalAnswered > 0
+      ? (totalCorrect / totalAnswered) * 100
+      : 0;
+  
+    return {
+      totalCards,
+      masteredCards,
+      progress,
+      totalCorrect,
+      totalAnswered,
+      correctnessRate,
+    };
+  }

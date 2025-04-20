@@ -128,13 +128,15 @@ app.get("/api/progress", (req, res) => {
   }
 });
 
-app.post('/api/day/next', (req, res) => {
+app.post('/api/day/next', (req: Request, res: Response) => {
   try {
     incrementDay();
     const newDay = getCurrentDay();
     console.log(`[Day] Advanced to Day ${newDay}`);
-    res.status(200).json({ message: 'Day advanced.', day: newDay });
+    // Return only the currentDay field
+    res.status(200).json({ currentDay: newDay });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Failed to advance day.' });
   }
 });

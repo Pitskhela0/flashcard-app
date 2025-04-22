@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Flashcard, AnswerDifficulty, UpdateRequest } from '../types';
-import { fetchPracticeCards, submitAnswer, advanceDay } from '../services/api';
-import FlashcardDisplay from './FlashcardDisplay';
-
+import React, { useState, useEffect } from "react";
+import { Flashcard, AnswerDifficulty, UpdateRequest } from "../types";
+import { fetchPracticeCards, submitAnswer, advanceDay } from "../services/api";
+import FlashcardDisplay from "./FlashcardDisplay";
 
 export default function PracticeView() {
   const [practiceCards, setPracticeCards] = useState<Flashcard[]>([]);
@@ -20,13 +19,10 @@ export default function PracticeView() {
     try {
       const response = await fetchPracticeCards();
       setPracticeCards(response.cards);
-      console.log(response.cards);
       setDay(response.day);
-      if (response.cards.length === 0) {
-        setSessionFinished(true);
-      }
+      if (response.cards.length === 0) setSessionFinished(true);
     } catch {
-      setError('Failed to load practice cards.');
+      setError("Failed to load practice cards.");
     } finally {
       setIsLoading(false);
     }
@@ -41,11 +37,11 @@ export default function PracticeView() {
   const handleAnswer = async (difficulty: AnswerDifficulty) => {
     const card = practiceCards[currentCardIndex];
     try {
-      const ans  : UpdateRequest = {
+      const ans: UpdateRequest = {
         cardFront: card.front,
         cardBack: card.back,
-        difficulty: difficulty,
-      }
+        difficulty,
+      };
       await submitAnswer(ans);
       if (currentCardIndex + 1 < practiceCards.length) {
         setCurrentCardIndex(currentCardIndex + 1);
@@ -54,7 +50,7 @@ export default function PracticeView() {
         setSessionFinished(true);
       }
     } catch {
-      setError('Failed to submit answer.');
+      setError("Failed to submit answer.");
     }
   };
 
@@ -65,7 +61,7 @@ export default function PracticeView() {
       setShowBack(false);
       loadPracticeCards();
     } catch {
-      setError('Failed to advance day.');
+      setError("Failed to advance day.");
     }
   };
 
@@ -74,8 +70,10 @@ export default function PracticeView() {
 
   if (sessionFinished) {
     return (
-      <div className="p-6 text-center bg-white shadow-lg rounded-xl max-w-md mx-auto">
-        <h2 className="text-2xl font-semibold text-green-700 mb-4">Session Complete!</h2>
+      <div className="p-6 text-center bg-white dark:bg-gray-800 shadow-lg rounded-xl max-w-md mx-auto">
+        <h2 className="text-2xl font-semibold text-green-700 mb-4">
+          Session Complete!
+        </h2>
         <button
           onClick={handleNextDay}
           className="px-5 py-2.5 bg-green-600 hover:bg-green-700 transition text-white rounded-lg shadow"
@@ -89,45 +87,50 @@ export default function PracticeView() {
   const currentCard = practiceCards[currentCardIndex];
 
   return (
-    <div className="p-6 max-w-md mx-auto bg-white rounded-xl shadow-md space-y-6">
-      <div className="text-sm font-medium text-gray-600 text-center">
-        Day <span className="font-bold text-blue-700">{day}</span> — Card{' '}
-        <span className="font-bold text-blue-700">{currentCardIndex + 1}</span> of{' '}
-        <span className="font-bold text-blue-700">{practiceCards.length}</span>
-      </div>
+    <div className="w-full bg-gray-50 dark:bg-gray-900 flex items-start justify-center px-4 py-8">
+      <div className="p-6 w-full max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-md space-y-6">
+        <div className="text-sm font-medium text-gray-600 dark:text-gray-300 text-center">
+          Day <span className="font-bold text-blue-700">{day}</span> — Card{' '}
+          <span className="font-bold text-blue-700">{currentCardIndex + 1}</span> of{' '}
+          <span className="font-bold text-blue-700">{practiceCards.length}</span>
+        </div>
 
-      <FlashcardDisplay card={currentCard} showBack={showBack} />
+        {/* Flashcard with flexible height */}
+        <div className="overflow-auto">
+          <FlashcardDisplay card={currentCard} showBack={showBack} />
+        </div>
 
-      <div className="flex flex-col gap-3">
-        {!showBack ? (
-          <button
-            onClick={handleShowBack}
-            className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow transition"
-          >
-            Show Answer
-          </button>
-        ) : (
-          <>
+        <div className="flex flex-col gap-3">
+          {!showBack ? (
             <button
-              onClick={() => handleAnswer(AnswerDifficulty.Easy)}
-              className="w-full py-2 bg-green-500 hover:bg-green-600 text-white font-medium rounded-lg shadow transition"
+              onClick={handleShowBack}
+              className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow transition"
             >
-              Easy
+              Show Answer
             </button>
-            <button
-              onClick={() => handleAnswer(AnswerDifficulty.Hard)}
-              className="w-full py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-medium rounded-lg shadow transition"
-            >
-              Hard
-            </button>
-            <button
-              onClick={() => handleAnswer(AnswerDifficulty.Wrong)}
-              className="w-full py-2 bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg shadow transition"
-            >
-              Wrong
-            </button>
-          </>
-        )}
+          ) : (
+            <>
+              <button
+                onClick={() => handleAnswer(AnswerDifficulty.Easy)}
+                className="w-full py-2 bg-green-500 hover:bg-green-600 text-white font-medium rounded-lg shadow transition"
+              >
+                Easy
+              </button>
+              <button
+                onClick={() => handleAnswer(AnswerDifficulty.Hard)}
+                className="w-full py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-medium rounded-lg shadow transition"
+              >
+                Hard
+              </button>
+              <button
+                onClick={() => handleAnswer(AnswerDifficulty.Wrong)}
+                className="w-full py-2 bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg shadow transition"
+              >
+                Wrong
+              </button>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -8,7 +8,6 @@ import {
 } from "../types";
 
 const API_BASE_URL = "http://localhost:3001/api";
-const a = 1;
 const apiClient = axios.create({ baseURL: API_BASE_URL });
 
 export const fetchPracticeCards = async (): Promise<PracticeSession> => {

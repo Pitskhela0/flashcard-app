@@ -8,7 +8,7 @@ import {
 } from "../types";
 
 const API_BASE_URL = "http://localhost:3001/api";
-
+const a = 1;
 const apiClient = axios.create({ baseURL: API_BASE_URL });
 
 export const fetchPracticeCards = async (): Promise<PracticeSession> => {
@@ -18,11 +18,11 @@ export const fetchPracticeCards = async (): Promise<PracticeSession> => {
 
 // POST /update (submit answer for a flashcard)
 export const submitAnswer = async (payload: UpdateRequest): Promise<void> => {
-  await apiClient.post("/update", { payload });
+  await apiClient.post("/update",  payload );
 };
 
 // GET /hint
-export const getHint = async (card: Flashcard): Promise<string> => {
+export const fetchHint = async (card: Flashcard): Promise<string> => {
   const response = await apiClient.get("/hint", {
     params: { cardFront: card.front, cardBack: card.back },
   });

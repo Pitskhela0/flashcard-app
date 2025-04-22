@@ -73,9 +73,9 @@ export function practice(
   day: number
 ): Set<Flashcard> {
   let res: Set<Flashcard> = new Set<Flashcard>()
-
   for(let i = 0; i < buckets.length; i++){
-    if(day-1 % Math.pow(2,i) === 0 && buckets[i]){
+    console.log(day+1 % Math.pow(2,i) === 0)
+    if(day % Math.pow(2,i) === 0){
       buckets[i]!.forEach((card) => res.add(card));
     }
   }

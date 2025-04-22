@@ -1,4 +1,4 @@
-import { Flashcard, BucketMap, AnswerDifficulty } from "@logic/flashcards";
+import { Flashcard, BucketMap, AnswerDifficulty } from "./logic/flashcards";
 import { PracticeRecord } from "./types";
 
 const initialCards: Flashcard[] = [
@@ -19,7 +19,7 @@ const initialCards: Flashcard[] = [
 let currentBuckets: BucketMap = new Map();
 currentBuckets.set(0, new Set(initialCards));
 let practiceHistory: PracticeRecord[] = [];
-let currentDay: number = 0;
+let currentDay: number = 1;
 
 export function getBuckets(): BucketMap {
   return currentBuckets;

@@ -7,7 +7,7 @@ import {
   update,
   getHint,
   computeProgress,
-} from "@logic/algorithm";
+} from "./logic/algorithm";
 import {
   getBuckets,
   setBuckets,
@@ -18,7 +18,7 @@ import {
   findCard,
   findCardBucket,
 } from "./state";
-import { AnswerDifficulty, Flashcard } from "@logic/flashcards";
+import { AnswerDifficulty, Flashcard } from "./logic/flashcards";
 import { PracticeRecord } from "./types";
 
 interface UpdateRequestBody {
@@ -51,15 +51,18 @@ app.get("/api/practice", (req, res) => {
 
 app.post(
   "/api/update",
-  (req: Request<{}, {}, UpdateRequestBody>, res: Response): void => {
+  (req, res): void => {
     try {
+      console.log("1")
       const { cardFront, cardBack, difficulty } = req.body;
+      
 
       // 1. Validate difficulty
       if (!Object.values(AnswerDifficulty).includes(difficulty)) {
         res.status(400).json({ error: "Invalid difficulty value." });
         return;
       }
+      console.log("2")
 
       // 2. Find the card
       const card = findCard(cardFront, cardBack);
@@ -67,12 +70,14 @@ app.post(
         res.status(404).json({ error: "Card not found." });
         return;
       }
+      console.log("3")
 
       // 3. Update buckets
       const currentBuckets = getBuckets();
       const previousBucket = findCardBucket(card)!;
       update(currentBuckets, card, difficulty); // not so clean
       const newBucket = findCardBucket(card)!;
+      console.log("4")
 
       // 4. Record history
       const record: PracticeRecord = {
@@ -83,8 +88,8 @@ app.post(
         previousBucket,
         newBucket,
       };
+      console.log("5")
       addHistoryRecord(record);
-
       console.log(`[Update] "${cardFront}": ${previousBucket} → ${newBucket}`);
       res.status(200).json({ message: "Card updated." });
     } catch (error) {

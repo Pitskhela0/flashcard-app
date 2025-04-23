@@ -73,8 +73,8 @@ export function practice(
   day: number
 ): Set<Flashcard> {
   let res: Set<Flashcard> = new Set<Flashcard>()
-  for(let i = 0; i < buckets.length; i++){
-    console.log(day+1 % Math.pow(2,i) === 0)
+  const length = buckets.length === 5 ?  4 : buckets.length;
+  for(let i = 0; i < length; i++){
     if(day % Math.pow(2,i) === 0){
       buckets[i]!.forEach((card) => res.add(card));
     }
@@ -137,6 +137,9 @@ export function update(
   ensures The same input always produces the same hint.
  */
   export function getHint(card: Flashcard): string | undefined {
+    if (card.hint !== ""){
+      return card.hint
+    }
     const back = card.back;
   
     if (!back || back.trim().length < 2) {

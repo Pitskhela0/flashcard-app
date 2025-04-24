@@ -14,8 +14,9 @@ selectionIcon.style.padding = "2px 5px";
 selectionIcon.style.borderRadius = "3px";
 selectionIcon.style.fontSize = "14px";
 
-
 document.body.appendChild(selectionIcon);
+
+const STORAGE_KEY = "selectedTextForPopup";
 
 document.addEventListener(
   "mouseup",
@@ -24,6 +25,9 @@ document.addEventListener(
 
     if (selectedText && selectedText.trim() !== "") {
       console.log("Text selected:", selectedText);
+
+      storeSelectedText(selectedText)
+      console.log("put in storage")
 
       const selection = window.getSelection();
 
@@ -42,6 +46,7 @@ document.addEventListener(
       }
     } else {
       selectionIcon.style.display = "none";
+      clearSelectedTextFromStorage();
     }
   },
   10
@@ -50,4 +55,30 @@ document.addEventListener("mousedown", handleMouseDown);
 
 function handleMouseDown() {
   selectionIcon.style.display = "none";
+
+  clearSelectedTextFromStorage();
+}
+
+function storeSelectedText(text){
+    chrome.storage.local.set({[STORAGE_KEY] : text}, ()=> {
+        if(chrome.runtime.lastError){
+            console.error("Error setting selected text in storage")
+        }else {
+            console.log("Selected text stored:",text);
+        }
+    })
+
+}
+
+function clearSelectedTextFromStorage() {
+  chrome.storage.local.remove(STORAGE_KEY, () => {
+    if (chrome.runtime.lastError) {
+      console.error(
+        "Error removing selected text from storage:",
+        chrome.runtime.lastError
+      );
+    } else {
+      console.log("Cleared selected text from storage.");
+    }
+  });
 }

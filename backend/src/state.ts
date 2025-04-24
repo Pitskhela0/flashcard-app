@@ -92,7 +92,7 @@ export function addFlashcard({
   front: string;
   back: string;
   hint: string;
-}): void {
+}): FlashcardInterface {
   const flashcard: Flashcard = new Flashcard(
     randomUUID(),
     front,
@@ -105,6 +105,7 @@ export function addFlashcard({
   }
 
   currentBuckets.get(0)!.add(flashcard);
+  return flashcard;
   
 }
 

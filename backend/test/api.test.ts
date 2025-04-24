@@ -6,7 +6,6 @@ import { describe, it } from "node:test";
 import { equal } from "assert";
 import { totalflashcards } from "../src/state";
 
-
 /*
 Test for Flashcard API endpoint: /api/flashcards
 */
@@ -26,12 +25,14 @@ describe("Flashcard API Endpoint: /api/flashcards", () => {
         .send(validFlashcardData);
       const finalLength = totalflashcards();
 
-      expect(finalLength).to.equal(initailLength+1,"Store length should increase by 1")
+      expect(finalLength).to.equal(
+        initailLength + 1,
+        "Store length should increase by 1"
+      );
       expect(response.status).to.equal(201);
       expect(response.body).to.have.property("front", validFlashcardData.front);
       expect(response.body).to.have.property("back", validFlashcardData.back);
       expect(response.body).to.have.property("hint", validFlashcardData.hint);
-
     });
     it("should return 400 bad request when given invalid data", async () => {
       const invalidFlashcardData = {
@@ -42,9 +43,9 @@ describe("Flashcard API Endpoint: /api/flashcards", () => {
       const response = await request(app)
         .post("/api/flashcards")
         .send(invalidFlashcardData);
-      
-        expect(response.status).to.equal(400); 
-        expect(response.body).to.have.property("error", "invalid data was sent");
+
+      expect(response.status).to.equal(400);
+      expect(response.body).to.have.property("error", "invalid data was sent");
     });
   });
 });

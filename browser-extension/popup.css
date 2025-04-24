@@ -1,0 +1,106 @@
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    width: 350px; /* Adjust width as needed */
+    padding: 15px;
+    background-color: #f9f9f9; /* Light background */
+    color: #333;
+    margin: 0; /* Remove default body margin */
+  }
+  
+  /* Heading Style */
+  h1 {
+    font-size: 1.2em;
+    margin-top: 0;
+    margin-bottom: 20px; /* Add space below heading */
+    text-align: center;
+    color: #444;
+  }
+  
+  /* Form Group Styling (for spacing) */
+  .form-group {
+    margin-bottom: 15px; /* Space between each label/input group */
+  }
+  
+  /* Label Styling */
+  label {
+    display: block; /* Make labels appear on their own line */
+    margin-bottom: 5px; /* Space between label and input */
+    font-size: 0.9em;
+    font-weight: bold;
+    color: #555;
+  }
+  
+  /* Input/Textarea Styling */
+  textarea {
+    width: 100%; /* Make inputs fill container width */
+    padding: 8px 10px; /* Add padding inside the inputs */
+    border: 1px solid #ccc; /* Simple border */
+    border-radius: 4px; /* Slightly rounded corners */
+    font-size: 1em; /* Consistent font size */
+    font-family: inherit; /* Use the body's font */
+    box-sizing: border-box; /* Include padding/border in width calculation */
+    resize: vertical; /* Allow vertical resize, prevent horizontal */
+    min-height: 40px; /* Prevent textareas from becoming too small */
+  }
+  
+  /* Focus state for inputs */
+  textarea:focus {
+    outline: none; /* Remove default outline */
+    border-color: #007bff; /* Blue border on focus */
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25); /* Subtle glow effect */
+  }
+  
+  /* Button Styling */
+  .button-group {
+    text-align: center; /* Center the button */
+    margin-top: 20px; /* Space above the button */
+  }
+  
+  button {
+    padding: 10px 20px; /* Button padding */
+    font-size: 1em;
+    font-weight: bold;
+    color: #fff; /* White text */
+    background-color: #007bff; /* Bootstrap blue */
+    border: none; /* Remove default border */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.2s ease; /* Smooth hover effect */
+  }
+  
+  /* Button Hover State (only when not disabled) */
+  button:hover:not(:disabled) {
+    background-color: #0056b3; /* Darker blue */
+  }
+  
+  /* Button Disabled State (will be used in P2.6) */
+  button:disabled {
+    background-color: #ccc; /* Grey background */
+    cursor: not-allowed; /* Indicate it's not clickable */
+  }
+  
+  /* Message Area Styling (for P2.8) */
+  #message-area {
+    margin-top: 15px;
+    padding: 10px;
+    min-height: 20px; /* Reserve some space */
+    text-align: center;
+    font-size: 0.9em;
+    border-radius: 4px;
+    /* Initially hidden or no background */
+    background-color: transparent;
+    border: none;
+    color: inherit;
+  }
+  
+  /* Specific styles for success/error messages (add class via JS later) */
+  #message-area.success {
+    background-color: #d4edda; /* Light green */
+    color: #155724; /* Dark green text */
+    border: 1px solid #c3e6cb;
+  }
+  
+  #message-area.error {
+    background-color: #f8d7da; /* Light red */
+    color: #721c24; /* Dark red text */
+    border: 1px solid #f5c6cb;

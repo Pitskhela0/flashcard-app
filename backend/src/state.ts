@@ -3,17 +3,19 @@ import { PracticeRecord } from "./types";
 
 const initialCards: Flashcard[] = [
   new Flashcard(
+    "1",
     "What is the capital of France?",
     "Paris",
     "It's known as the city of love.",
-    ["geography"]
+    ["geography"],
+    
   ),
-  new Flashcard("2 + 2", "4", "Basic math", ["math"]),
-  new Flashcard(
+  new Flashcard("2","2 + 2", "4", "Basic math", ["math"],),
+  new Flashcard("3",
     "What does HTTP stand for?",
     "HyperText Transfer Protocol",
     "Internet protocol",
-    ["tech"]
+    ["tech"],
   ),
 ];
 let currentBuckets: BucketMap = new Map();
@@ -25,11 +27,9 @@ export function getBuckets(): BucketMap {
   return currentBuckets;
 }
 
-export function setBuckets(newBuckets: BucketMap): void {
-  currentBuckets = newBuckets;
-}
+
 export function getHistory(): PracticeRecord[] {
-  return practiceHistory;
+  return [...practiceHistory];
 }
 
 export function addHistoryRecord(record: PracticeRecord): void {

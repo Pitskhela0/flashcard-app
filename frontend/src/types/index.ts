@@ -6,7 +6,7 @@ export interface Flashcard {
     hint?: string; // Optional, as hint may not always be included
     tags: ReadonlyArray<string>;
 
-  }
+}
   
   // -- AnswerDifficulty Enum --
   export enum AnswerDifficulty {

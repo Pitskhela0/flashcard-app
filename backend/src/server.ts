@@ -10,7 +10,6 @@ import {
 } from "./logic/algorithm";
 import {
   getBuckets,
-  setBuckets,
   getHistory,
   addHistoryRecord,
   getCurrentDay,
@@ -27,7 +26,7 @@ interface UpdateRequestBody {
   difficulty: AnswerDifficulty;
 }
 
-const app = express();
+export const app = express();
 
 const PORT = process.env.PORT || 3001;
 
@@ -38,11 +37,9 @@ app.use(express.json());
 app.get("/api/practice", (req, res) => {
   try {
     const day = getCurrentDay();
-    console.log(day);
     const bucketMap = getBuckets();
     const bucketSets = toBucketSets(bucketMap);
     const cardsSet = practice(bucketSets, day);
-    console.log(cardsSet)
     const cardsArray = Array.from(cardsSet);
     console.log(`[Practice] Found ${cardsArray.length} cards for day ${day}`);
     res.json({ cards: cardsArray, day });

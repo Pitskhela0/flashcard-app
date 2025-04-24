@@ -1,5 +1,12 @@
 import { Flashcard, AnswerDifficulty, BucketMap } from "@logic/flashcards";
 
+export interface FlashcardInterface {
+  id: string;       
+  front: string;    
+  back: string;     
+  hint?: string;    
+}
+
 export interface PracticeSession {
   cards: Flashcard[];
   day: number;

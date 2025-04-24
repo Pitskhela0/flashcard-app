@@ -1,7 +1,6 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
 
-
 import {
   toBucketSets,
   practice,
@@ -36,24 +35,48 @@ app.use(cors());
 
 app.use(express.json());
 
+/**
+ * Handles POST requests on the `/api/flashcards` endpoint to create a new flashcard.
+ *
+ * Expects a JSON request body containing `front` (string) and `back` (string).
+ * An optional `hint` (string) can also be included.
+ *
+ * Validation checks:
+ * - Ensures `front` and `back` are provided and are non-empty strings.
+ *
+ * Responses:
+ * - On Success: Sends a `201 Created` status code and returns the newly created
+ *   flashcard object as JSON in the response body.
+ * - On Validation Error: Sends a `400 Bad Request` status code with a JSON body:
+ *   `{ error: "invalid data was sent" }`.
+ * - On Internal Server Error: Sends a `500 Internal Server Error` status code with a JSON body:
+ *   `{ error: "Internal server error" }`.
+ *
+ * @param  req - The Express request object. Expected `req.body` to contain flashcard data.
+ * @param  res - The Express response object used to send the response.
+ */
 app.post("/api/flashcards", (req, res) => {
   try {
     const { front, back, hint } = req.body;
-    if (!front || !back || typeof front !== 'string' || typeof back !== 'string') {
+    if (
+      !front ||
+      !back ||
+      typeof front !== "string" ||
+      typeof back !== "string"
+    ) {
       res.status(400).json({ error: "invalid data was sent" });
       return;
-
     }
     const newFlashcard = {
       front: front,
       back: back,
-      hint: hint
-    } 
+      hint: hint,
+    };
     addFlashcard(newFlashcard);
-    res.status(201).json(newFlashcard);
 
+    res.status(201).json(newFlashcard);
   } catch (error) {
-    res.status(500).json({ error: "Internal server error" })
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 

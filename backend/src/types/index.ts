@@ -1,10 +1,19 @@
 import { Flashcard, AnswerDifficulty, BucketMap } from "@logic/flashcards";
 
+/**
+ * defines the standard structure of for a flashcard object in backend system
+ *
+ * represents the data stroed for each flashcard
+ */
 export interface FlashcardInterface {
-  id: string;       
-  front: string;    
-  back: string;     
-  hint?: string;    
+  /**  the unique identifier for the flashcard */
+  id: string;
+  /**  represents front side of the flashcard  */
+  front: string;
+  /** represents back side of the flashcard */
+  back: string;
+  /**  represents hint for the flashcard   */
+  hint?: string;
 }
 
 export interface PracticeSession {

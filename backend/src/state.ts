@@ -64,12 +64,26 @@ export function findCardBucket(cardToFind: Flashcard): number | undefined {
   }
   return undefined;
 }
+
+/**
+ * 
+ * @returns the total number of flashcards in our currentBucket
+ */
+
 export function totalflashcards(): number {
   let res = 0;
   currentBuckets.forEach((val,key) => res += val.size)
   return res;
 }
 
+/**
+ * adds the flashcard with given parameters to currentBuckets
+ * 
+ * @param front represents the front side of the flashcard
+ * @param back represents the back side of the flashcard
+ * @param hint represnts the hint for your flashcard it might be empty
+ * @returns nothing  
+ */
 export function addFlashcard({
   front,
   back,
@@ -78,7 +92,7 @@ export function addFlashcard({
   front: string;
   back: string;
   hint: string;
-}): FlashcardInterface {
+}): void {
   const flashcard: Flashcard = new Flashcard(
     randomUUID(),
     front,
@@ -91,7 +105,7 @@ export function addFlashcard({
   }
 
   currentBuckets.get(0)!.add(flashcard);
-  return flashcard;
+  
 }
 
 console.log("✅ In-memory flashcard state initialized");

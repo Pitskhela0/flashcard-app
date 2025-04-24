@@ -64,6 +64,11 @@ export function findCardBucket(cardToFind: Flashcard): number | undefined {
   }
   return undefined;
 }
+export function totalflashcards(): number {
+  let res = 0;
+  currentBuckets.forEach((val,key) => res += val.size)
+  return res;
+}
 
 export function addFlashcard({
   front,

@@ -4,6 +4,8 @@ import { expect } from "chai";
 import { app } from "../src/server";
 import { describe, it } from "node:test";
 import { equal } from "assert";
+import { totalflashcards } from "../src/state";
+
 
 /*
 Test for Flashcard API endpoint: /api/flashcards
@@ -17,15 +19,19 @@ describe("Flashcard API Endpoint: /api/flashcards", () => {
         back: "A library for testing Node.js HTTP servers.",
         hint: "Think integration testing for APIs",
       };
+      const initailLength = totalflashcards();
       const response = await request(app)
         .post("/api/flashcards")
         .set("Accept", "application/json")
         .send(validFlashcardData);
+      const finalLength = totalflashcards();
 
+      expect(finalLength).to.equal(initailLength+1,"Store length should increase by 1")
       expect(response.status).to.equal(201);
       expect(response.body).to.have.property("front", validFlashcardData.front);
       expect(response.body).to.have.property("back", validFlashcardData.back);
       expect(response.body).to.have.property("hint", validFlashcardData.hint);
+
     });
     it("should return 400 bad request when given invalid data", async () => {
       const invalidFlashcardData = {

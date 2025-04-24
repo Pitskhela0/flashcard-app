@@ -11,7 +11,7 @@ Test for Flashcard API endpoint: /api/flashcards
 describe("Flashcard API Endpoint: /api/flashcards", () => {
   // test for post request
   describe("POST /api/flashcards", async () => {
-    it("should return 201 Created and the new flashcard id when given valid data", async () => {
+    it("should return 201 Created and the new flashcard when given valid data", async () => {
       const validFlashcardData = {
         front: "What is Supertest?",
         back: "A library for testing Node.js HTTP servers.",

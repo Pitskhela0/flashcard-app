@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
 
+
 import {
   toBucketSets,
   practice,
@@ -16,9 +17,10 @@ import {
   incrementDay,
   findCard,
   findCardBucket,
+  addFlashcard,
 } from "./state";
 import { AnswerDifficulty, Flashcard } from "./logic/flashcards";
-import { PracticeRecord } from "./types";
+import { FlashcardInterface, PracticeRecord } from "./types";
 
 interface UpdateRequestBody {
   cardFront: string;
@@ -34,6 +36,27 @@ app.use(cors());
 
 app.use(express.json());
 
+app.post("/api/flashcards", (req, res) => {
+  try {
+    const { front, back, hint } = req.body;
+    if (!front || !back || typeof front !== 'string' || typeof back !== 'string') {
+      res.status(400).json({ error: "invalid data was sent" });
+      return;
+
+    }
+    const newFlashcard = {
+      front: front,
+      back: back,
+      hint: hint
+    } 
+    addFlashcard(newFlashcard);
+    res.status(201).json(newFlashcard);
+
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" })
+  }
+});
+
 app.get("/api/practice", (req, res) => {
   try {
     const day = getCurrentDay();
@@ -48,51 +71,47 @@ app.get("/api/practice", (req, res) => {
   }
 });
 
-app.post(
-  "/api/update",
-  (req, res): void => {
-    try {
-      const { cardFront, cardBack, difficulty } = req.body;
-      
+app.post("/api/update", (req, res): void => {
+  try {
+    const { cardFront, cardBack, difficulty } = req.body;
 
-      // 1. Validate difficulty
-      if (!Object.values(AnswerDifficulty).includes(difficulty)) {
-        res.status(400).json({ error: "Invalid difficulty value." });
-        return;
-      }
-
-      // 2. Find the card
-      const card = findCard(cardFront, cardBack);
-      if (!card) {
-        res.status(404).json({ error: "Card not found." });
-        return;
-      }
-
-      // 3. Update buckets
-      const currentBuckets = getBuckets();
-      const previousBucket = findCardBucket(card)!;
-      update(currentBuckets, card, difficulty); // not so clean
-      
-      const newBucket = findCardBucket(card)!;
-
-      // 4. Record history
-      const record: PracticeRecord = {
-        cardFront,
-        cardBack,
-        timestamp: Date.now(),
-        difficulty,
-        previousBucket,
-        newBucket,
-      };
-      addHistoryRecord(record);
-      console.log(`[Update] "${cardFront}": ${previousBucket} → ${newBucket}`);
-      res.status(200).json({ message: "Card updated." });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Failed to update card." });
+    // 1. Validate difficulty
+    if (!Object.values(AnswerDifficulty).includes(difficulty)) {
+      res.status(400).json({ error: "Invalid difficulty value." });
+      return;
     }
+
+    // 2. Find the card
+    const card = findCard(cardFront, cardBack);
+    if (!card) {
+      res.status(404).json({ error: "Card not found." });
+      return;
+    }
+
+    // 3. Update buckets
+    const currentBuckets = getBuckets();
+    const previousBucket = findCardBucket(card)!;
+    update(currentBuckets, card, difficulty); // not so clean
+
+    const newBucket = findCardBucket(card)!;
+
+    // 4. Record history
+    const record: PracticeRecord = {
+      cardFront,
+      cardBack,
+      timestamp: Date.now(),
+      difficulty,
+      previousBucket,
+      newBucket,
+    };
+    addHistoryRecord(record);
+    console.log(`[Update] "${cardFront}": ${previousBucket} → ${newBucket}`);
+    res.status(200).json({ message: "Card updated." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to update card." });
   }
-);
+});
 
 app.get("/api/hint", (req, res) => {
   try {
@@ -128,7 +147,7 @@ app.get("/api/progress", (req, res) => {
   }
 });
 
-app.post('/api/day/next', (req: Request, res: Response) => {
+app.post("/api/day/next", (req: Request, res: Response) => {
   try {
     incrementDay();
     const newDay = getCurrentDay();
@@ -137,11 +156,10 @@ app.post('/api/day/next', (req: Request, res: Response) => {
     res.status(200).json({ currentDay: newDay });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Failed to advance day.' });
+    res.status(500).json({ error: "Failed to advance day." });
   }
 });
 
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on http://localhost:${PORT}`);
 });
-

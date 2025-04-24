@@ -1,5 +1,7 @@
 import { Flashcard, BucketMap, AnswerDifficulty } from "./logic/flashcards";
 import { PracticeRecord } from "./types";
+import { FlashcardInterface } from "./types";
+import { randomUUID } from "crypto";
 
 const initialCards: Flashcard[] = [
   new Flashcard(
@@ -7,15 +9,15 @@ const initialCards: Flashcard[] = [
     "What is the capital of France?",
     "Paris",
     "It's known as the city of love.",
-    ["geography"],
-    
+    ["geography"]
   ),
-  new Flashcard("2","2 + 2", "4", "Basic math", ["math"],),
-  new Flashcard("3",
+  new Flashcard("2", "2 + 2", "4", "Basic math", ["math"]),
+  new Flashcard(
+    "3",
     "What does HTTP stand for?",
     "HyperText Transfer Protocol",
     "Internet protocol",
-    ["tech"],
+    ["tech"]
   ),
 ];
 let currentBuckets: BucketMap = new Map();
@@ -26,7 +28,6 @@ let currentDay: number = 1;
 export function getBuckets(): BucketMap {
   return currentBuckets;
 }
-
 
 export function getHistory(): PracticeRecord[] {
   return [...practiceHistory];
@@ -64,5 +65,28 @@ export function findCardBucket(cardToFind: Flashcard): number | undefined {
   return undefined;
 }
 
-console.log("✅ In-memory flashcard state initialized");
+export function addFlashcard({
+  front,
+  back,
+  hint,
+}: {
+  front: string;
+  back: string;
+  hint: string;
+}): FlashcardInterface {
+  const flashcard: Flashcard = new Flashcard(
+    randomUUID(),
+    front,
+    back,
+    hint,
+    []
+  );
+  if (!currentBuckets.has(0)) {
+    currentBuckets.set(0, new Set<Flashcard>());
+  }
 
+  currentBuckets.get(0)!.add(flashcard);
+  return flashcard;
+}
+
+console.log("✅ In-memory flashcard state initialized");

@@ -1,17 +1,37 @@
+/**
+ * Sets up the popup's functionality once the HTML DOM is fully loaded.
+ * This includes getting element references, attempting to load selected text
+ * from storage, setting up input validation, and adding the save button listener.
+ * @listens DOMContentLoaded
+ */
+
 document.addEventListener("DOMContentLoaded", () => {
+  /**  @type {HTMLTextAreaElement|null} Textarea for the flashcards front */
   const frontInput = document.getElementById("front-input");
+  /**  @type {HTMLTextAreaElement|null} Textarea for the flashcards back */
+
   const backInput = document.getElementById("back-input");
+  /**  @type {HTMLTextAreaElement|null} Textarea for the flashcards hint */
+
   const hintInput = document.getElementById("hint-input");
+  /**  @type {HTMLDivElement|null} Area to display success or error messages. */
+
   const messageArea = document.getElementById("message-area");
+  /** @type {HTMLButtonElement|null} Button to trigger saving the flashcard. */
   const saveButton = document.getElementById("save-button");
 
+  /** Key used to retrieve selected text from chrome.storage.local */
   const storageKey = "selectedTextForPopup";
+
+  // check if core elements needed for functionality are found.
   if (!frontInput || !backInput || !saveButton) {
     console.error(
       "Error: Could not find all required form elements (front, back, save button)."
     );
-    return; // Stop execution if elements are missing
+    return;
   }
+
+  // Asynchronously gets the text that might have been saved by the content script.
   chrome.storage.local.get([storageKey], (result) => {
     if (chrome.runtime.lastError) {
       console.error(
@@ -22,9 +42,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     const selectedText = result[storageKey];
 
+    // If text was found in storage:
     if (selectedText) {
       frontInput.value = selectedText;
+      // check if we can click on save button
       validateInputs();
+
+      // Remove the text from storage immediately after using it,
+      // so it's not reused accidentally next time the popup opens.
       chrome.storage.local.remove(storageKey, () => {
         if (chrome.runtime.lastError) {
           console.error(
@@ -39,6 +64,12 @@ document.addEventListener("DOMContentLoaded", () => {
       validateInputs();
     }
   });
+  
+  /**  checks if we have entered valid sendable inputs. 
+   * front and back fields must not be empty.
+   * according to that disables or enables save button.
+   * 
+  */
 
   function validateInputs() {
     const frontValue = frontInput.value.trim();
@@ -52,10 +83,21 @@ document.addEventListener("DOMContentLoaded", () => {
       console.log("Validation: Inputs invalid, button disabled.");
     }
   }
-
+  
+  // listens to the change in input fields front and back to validate the inputs;
   frontInput.addEventListener("input", validateInputs);
   backInput.addEventListener("input", validateInputs);
 
+
+  /**
+   *
+   * handles save button click
+   * creates sendable data from input fields
+   * makes fetch request to backend to create flashcards
+   * after receiving response either shows success or error message
+   * uses asynch function because it awaits for fetch
+   * @listens click
+   */
   saveButton.addEventListener("click", async () => {
     const frontValue = frontInput.value;
     const backValue = backInput.value;
@@ -85,40 +127,43 @@ document.addEventListener("DOMContentLoaded", () => {
 
       console.log("Received response:", response);
 
-      // --- P2.8 will handle this response properly ---
-      // For now, just log basic status
+      
+     
       if (response.ok) {
-        // response.ok is true if status is 200-299
+        
         console.log("Flashcard saved successfully! Status:", response.status);
-        // Basic success message (will be improved in P2.8)
+        
         messageArea.textContent = "Success!";
-        messageArea.className = "success"; // Use CSS class for styling
+        messageArea.className = "success"; 
 
+        
+        // clear input fields
         frontInput.value = "";
         backInput.value = "";
         hintInput.value = "";
-
+        
+        // close popup window after 1 second from submition
         setTimeout(() => {
-          window.close(); // Close the popup window
+          window.close(); 
         }, 1000);
       } else {
         console.error("Failed to save flashcard. Status:", response.status);
         // Basic error message (will be improved in P2.8)
         const errorData = await response
           .json()
-          .catch(() => ({ error: "Failed to parse error response" })); // Try to get error message from body
+          .catch(() => ({ error: "Failed to parse error response" })); 
         messageArea.textContent = `Error: ${response.statusText} - ${
           errorData.error || "Unknown error"
         }`;
-        messageArea.className = "error"; // Use CSS class for styling
-        saveButton.disabled = false; // Re-enable button on failure
+        messageArea.className = "error";
+        saveButton.disabled = false; 
       }
     } catch (error) {
-      // --- Handle Network Errors ---
+      // handle network problems 
       console.error("Network error or fetch failed:", error);
       messageArea.textContent = "Network error. Is the backend server running?";
       messageArea.className = "error";
-      saveButton.disabled = false; // Re-enable button on network failure
+      saveButton.disabled = false; 
     }
   });
 });

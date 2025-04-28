@@ -262,4 +262,84 @@ describe("useGestureControl", () => {
       expect(result.current.confirmedOutcome).toBe("wrong");
     });
   });
-});
+
+  describe('UI Feedback State', () => {
+
+        it('should update feedbackGesture immediately when a gesture is processed', () => {
+            // --- Arrange ---
+            const mockOnGestureConfirmed = jest.fn();
+            const { result } = renderHook(() => useGestureControl({
+                onGestureConfirmed: mockOnGestureConfirmed,
+                isActive: true
+            }));
+
+            
+            
+            expect(result.current.feedbackGesture).toBeNull();
+
+            
+            act(() => { result.current.processDetectedGesture("THUMBS_UP"); });
+            
+            expect(result.current.feedbackGesture).toBe("THUMBS_UP");
+            
+            expect(result.current.confirmedOutcome).toBeNull();
+
+            
+            act(() => { result.current.processDetectedGesture("THUMBS_DOWN"); });
+            
+            expect(result.current.feedbackGesture).toBe("THUMBS_DOWN");
+            expect(result.current.confirmedOutcome).toBeNull(); 
+
+             
+            act(() => { result.current.processDetectedGesture("THUMBS_SIDEWAYS"); });
+            // --- Assert: Feedback updated immediately ---
+            expect(result.current.feedbackGesture).toBe("THUMBS_SIDEWAYS");
+            expect(result.current.confirmedOutcome).toBeNull(); // Still null
+
+             // --- Act: Process null (lose gesture) ---
+            act(() => { result.current.processDetectedGesture(null); });
+            // --- Assert: Feedback updated immediately ---
+            expect(result.current.feedbackGesture).toBeNull();
+            expect(result.current.confirmedOutcome).toBeNull(); // Still null
+        });
+
+        it('should keep feedbackGesture updated even after confirmation occurs', () => {
+            // Test that feedback reflects the *last* processed gesture,
+            // even if a *different* gesture was previously confirmed.
+             // --- Arrange ---
+             const mockOnGestureConfirmed = jest.fn();
+             const HOLD_DURATION_MS = 750;
+             const { result } = renderHook(() => useGestureControl({
+                 onGestureConfirmed: mockOnGestureConfirmed,
+                 isActive: true,
+                 holdDurationMs: HOLD_DURATION_MS
+             }));
+
+             // --- Act: Confirm THUMBS_UP ---
+             act(() => { result.current.processDetectedGesture("THUMBS_UP"); });
+             expect(result.current.feedbackGesture).toBe("THUMBS_UP"); // Feedback updated
+             act(() => { jest.advanceTimersByTime(HOLD_DURATION_MS); });
+             expect(result.current.confirmedOutcome).toBe("easy"); // Confirmation happened
+             expect(result.current.feedbackGesture).toBe("THUMBS_UP"); // Feedback remains
+
+             // --- Act: Process DOWN *after* confirmation ---
+             act(() => { result.current.processDetectedGesture("THUMBS_DOWN"); });
+             // --- Assert: Feedback updates, confirmation resets ---
+             expect(result.current.feedbackGesture).toBe("THUMBS_DOWN");
+             expect(result.current.confirmedOutcome).toBeNull(); // New gesture resets confirmation
+
+             // --- Act: Lose gesture ---
+             act(() => { result.current.processDetectedGesture(null); });
+             expect(result.current.feedbackGesture).toBeNull();
+
+        });
+
+        // NOTE: Tests for timeoutNotificationShown are already covered in
+        // the 'Overall Timeout (8 seconds)' describe block (P3.5a).
+        // Just ensure the hook actually *returns* timeoutNotificationShown.
+
+    }); // End describe UI Feedback State
+
+}); // End describe useGestureControl
+
+

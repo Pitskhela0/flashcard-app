@@ -8,6 +8,7 @@ export type GestureId =
   | null;
 export type GestureOutcome = "easy" | "wrong" | "hard" | null;
 
+
 interface UseGestureControlProps {
   onGestureConfirmed: (outcome: GestureOutcome) => void;
   isActive: boolean;
@@ -19,6 +20,7 @@ interface UseGestureControlReturn {
   confirmedOutcome: GestureOutcome;
   processDetectedGesture: (gesture: GestureId) => void;
   timeoutNotificationShown: boolean;
+  feedbackGesture: GestureId;
   // We'll add more return values later for feedback (P3.6b)
 }
 const DEFAULT_HOLD_DURATION_MS = 750;
@@ -58,6 +60,7 @@ export const useGestureControl = ({
     useState<GestureOutcome>(null);
   const [timeoutNotificationShown, setTimeoutNotificationShown] =
     useState<boolean>(false);
+  const [feedbackGesture,setFeedbackGesture] = useState<GestureId | null>(null)
   // --- Refs ---
   // Ref to store the timeout ID for the confirmation timer
   const confirmationTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -120,6 +123,7 @@ export const useGestureControl = ({
       }
 
       currentGestureRef.current = detectedGesture;
+      setFeedbackGesture(detectedGesture);
 
       if (detectedGesture !== null && detectedGesture !== "OTHER") {
         setGestureStartTime(Date.now());
@@ -147,5 +151,6 @@ export const useGestureControl = ({
     confirmedOutcome,
     processDetectedGesture,
     timeoutNotificationShown,
+    feedbackGesture,
   };
 };

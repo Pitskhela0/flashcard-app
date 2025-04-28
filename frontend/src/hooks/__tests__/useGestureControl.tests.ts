@@ -30,7 +30,7 @@ describe("useGestureControl", () => {
   });
 
   afterEach(() => {
-     jest.useRealTimers();
+    jest.useRealTimers();
     jest.clearAllTimers();
   });
   /**
@@ -49,7 +49,7 @@ describe("useGestureControl", () => {
       const mockOnGestureConfirmed = jest.fn();
       const HOLD_DURATION_MS = 750;
 
-      const { result,rerender } = renderHook(() =>
+      const { result, rerender } = renderHook(() =>
         useGestureControl({
           onGestureConfirmed: mockOnGestureConfirmed,
           isActive: true,
@@ -76,7 +76,7 @@ describe("useGestureControl", () => {
 
     it('should set confirmedOutcome to "hard" after holding "SIDEWAYS" for 0.75 seconds', () => {
       const mockOnGestureConfirmed = jest.fn();
-      const { result,rerender } = renderHook(() =>
+      const { result, rerender } = renderHook(() =>
         useGestureControl({
           onGestureConfirmed: mockOnGestureConfirmed,
           isActive: true,
@@ -99,7 +99,7 @@ describe("useGestureControl", () => {
 
     it('should set confirmedOutcome to "wrong" after holding "DOWN" for 0.75 seconds', () => {
       const mockOnGestureConfirmed = jest.fn();
-      const { result,rerender } = renderHook(() =>
+      const { result, rerender } = renderHook(() =>
         useGestureControl({
           onGestureConfirmed: mockOnGestureConfirmed,
           isActive: true,
@@ -126,7 +126,7 @@ describe("useGestureControl", () => {
       const mockOnGestureConfirmed = jest.fn();
       const HOLD_DURATION_MS = 750;
 
-      const { result,rerender } = renderHook(() =>
+      const { result, rerender } = renderHook(() =>
         useGestureControl({
           onGestureConfirmed: mockOnGestureConfirmed,
           isActive: true,
@@ -159,7 +159,7 @@ describe("useGestureControl", () => {
       const HOLD_DURATION_MS = 750;
       const mockOnGestureConfirmed = jest.fn();
 
-      const { result,rerender } = renderHook(() =>
+      const { result, rerender } = renderHook(() =>
         useGestureControl({
           onGestureConfirmed: mockOnGestureConfirmed,
           isActive: true,
@@ -192,6 +192,74 @@ describe("useGestureControl", () => {
       rerender();
       expect(result.current.confirmedOutcome).toBe("easy");
       expect(mockOnGestureConfirmed).toHaveBeenCalled();
+    });
+  });
+
+  describe("Timer passes 8 seconds", () => {
+    it("should set timeoutNotificationShown to true if no gesture confirmed within 8s", () => {
+      const OVERALL_TIMEOUT_MS = 8000;
+
+      const mockOnGestureConfirmed = jest.fn();
+
+      const { result } = renderHook(() =>
+        useGestureControl({
+          onGestureConfirmed: mockOnGestureConfirmed,
+          isActive: true,
+        })
+      );
+
+      expect(result.current.timeoutNotificationShown).toBe(false);
+
+      expect(result.current.confirmedOutcome).toBeNull();
+
+      act(() => jest.advanceTimersByTime(OVERALL_TIMEOUT_MS - 1));
+
+      expect(result.current.timeoutNotificationShown).toBe(false);
+      expect(result.current.confirmedOutcome).toBeNull();
+      expect(mockOnGestureConfirmed).not.toHaveBeenCalled();
+
+      act(() => {
+        jest.advanceTimersByTime(1); // Reach 8000ms
+      });
+
+      expect(result.current.timeoutNotificationShown).toBe(true);
+      expect(result.current.confirmedOutcome).toBeNull();
+      expect(mockOnGestureConfirmed).not.toHaveBeenCalled();
+    });
+
+    it("should NOT set timeoutNotificationShown if a gesture IS confirmed before 8s", () => {
+      const HOLD_DURATION_MS = 750;
+      const OVERALL_TIMEOUT_MS = 8000;
+
+      const mockOnGestureConfirmed = jest.fn();
+
+      const { result } = renderHook(() =>
+        useGestureControl({
+          onGestureConfirmed: mockOnGestureConfirmed,
+          isActive: true,
+        })
+      );
+
+      expect(result.current.timeoutNotificationShown).toBe(false);
+      expect(result.current.confirmedOutcome).toBeNull();
+
+      act(() => {
+        result.current.processDetectedGesture("THUMBS_DOWN");
+      });
+      act(() => {
+        jest.advanceTimersByTime(HOLD_DURATION_MS);
+      });
+
+      expect(result.current.confirmedOutcome).toBe("wrong");
+      expect(result.current.timeoutNotificationShown).toBe(false);
+      // (P3.7 will test that mockOnGestureConfirmed IS called here)
+
+      act(() => {
+        jest.advanceTimersByTime(OVERALL_TIMEOUT_MS);
+      });
+
+      expect(result.current.timeoutNotificationShown).toBe(false);
+      expect(result.current.confirmedOutcome).toBe("wrong");
     });
   });
 });

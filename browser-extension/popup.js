@@ -64,6 +64,8 @@ document.addEventListener("DOMContentLoaded", () => {
       validateInputs();
     }
   });
+
+  
   
   /**  checks if we have entered valid sendable inputs. 
    * front and back fields must not be empty.

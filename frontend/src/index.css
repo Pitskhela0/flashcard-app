@@ -87,3 +87,29 @@ button:focus-visible {
   transform: rotateY(180deg);
 }
 
+.gesture-feedback {
+  /* Uses utility classes mostly, add specific styles if needed */
+}
+
+.gesture-icons .icon {
+  padding: 5px;
+  border-radius: 50%;
+  display: inline-block; /* Helps with alignment */
+  transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out; /* Added transform */
+  /* Base non-glow style */
+  box-shadow: 0 0 0px 0px rgba(0, 123, 255, 0);
+  transform: scale(1);
+}
+
+/* Style for the 'glow' effect */
+.gesture-icons .icon.glow {
+  /* Use Tailwind focus ring or custom shadow */
+  box-shadow: 0 0 15px 5px rgba(59, 130, 246, 0.5); /* Example blue glow */
+  transform: scale(1.1); /* Slightly enlarge glowing icon */
+  background-color: rgba(59, 130, 246, 0.1); /* Faint background */
+}
+
+.timeout-warning {
+  /* Uses utility classes mostly, ensure text color/background are visible */
+}
+

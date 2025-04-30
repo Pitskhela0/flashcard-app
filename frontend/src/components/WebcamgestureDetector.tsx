@@ -1,3 +1,18 @@
+/**
+ * WebcamGestureDetector Component
+ * 
+ * Specifications:
+ * - Accesses and processes webcam video feed to detect hand gestures
+ * - Integrates with TensorFlow.js and MediaPipe Hands model for hand pose detection
+ * - Classifies detected hand poses into predefined gestures (thumbs up, down, sideways)
+ * - Efficiently manages system resources by:
+ *   - Only processing video when component is active
+ *   - Using appropriate frame rates for performance
+ *   - Properly cleaning up media streams and TensorFlow resources
+ * - Provides real-time feedback about detection status and errors
+ * - Implements privacy-focused design that processes all video locally
+ * - Handles browser compatibility and permission issues gracefully
+ */
 import React, { useEffect, useRef, useState } from "react";
 import { GestureId } from "../hooks/useGestureControl";
 import * as tf from "@tensorflow/tfjs";
@@ -25,24 +40,65 @@ export default function WebcamGestureDetector({
   isActive: boolean;
   onGestureDetected: (gesture: GestureId) => void;
 }) {
-  // Reference to the video element
+  /**
+   * Video Element Reference
+   * 
+   * Specifications:
+   * - Provides access to the video element in the DOM
+   * - Used to attach media stream and as input for hand detection
+   * - Hidden from user view as we don't need to display the webcam feed
+   */
   const videoRef = useRef<HTMLVideoElement>(null);
   
-  // State for handling errors and loading status
+  /**
+   * State Management
+   * 
+   * Specifications:
+   * - error: Stores error messages when camera or model initialization fails
+   * - isLoading: Tracks webcam initialization status
+   * - modelLoading: Tracks TensorFlow model loading status
+   */
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [modelLoading, setModelLoading] = useState<boolean>(true);
   
-  // Reference to the media stream to properly clean up
+  /**
+   * Media Stream Reference
+   * 
+   * Specifications:
+   * - Maintains reference to active media stream for proper cleanup
+   * - Prevents memory leaks by allowing stream tracks to be stopped
+   */
   const streamRef = useRef<MediaStream | null>(null);
   
-  // Reference to the hand pose detector model
+  /**
+   * Hand Pose Detector Reference
+   * 
+   * Specifications:
+   * - Stores reference to the TensorFlow.js hand pose detector model
+   * - Maintained in a ref to avoid recreating the model unnecessarily
+   */
   const detectorRef = useRef<handPoseDetection.HandDetector | null>(null);
   
-  // Reference to store the animation frame ID for cleanup
+  /**
+   * Animation Frame Reference
+   * 
+   * Specifications:
+   * - Stores the ID returned by requestAnimationFrame
+   * - Enables proper cancellation of animation frames during cleanup
+   */
   const requestAnimationIdRef = useRef<number | null>(null);
 
-  // Setup the webcam when the component mounts
+  /**
+   * Webcam Setup Effect
+   * 
+   * Specifications:
+   * - Sets up webcam access when component becomes active
+   * - Configures video stream with appropriate parameters for performance
+   * - Handles permission errors gracefully
+   * - Properly cleans up resources when component unmounts or becomes inactive
+   * - Triggers hand pose model loading when webcam is ready
+   */
   useEffect(() => {
     // Don't attempt to access the camera if detection is not active
     if (!isActive) {
@@ -53,7 +109,15 @@ export default function WebcamGestureDetector({
     setModelLoading(true);
     setError(null);
 
-    // Function to setup the webcam
+    /**
+     * Setup Webcam Function
+     * 
+     * Specifications:
+     * - Requests camera access with specific constraints for performance
+     * - Attaches stream to video element when access is granted
+     * - Handles errors and cleanup if permissions are denied
+     * - Triggers model loading when webcam is ready
+     */
     const setupWebcam = async () => {
       try {
         // Request camera access with specific constraints for performance
@@ -79,16 +143,6 @@ export default function WebcamGestureDetector({
         // Attach the stream to the video element
         videoRef.current.srcObject = stream;
         
-        // // Play the video
-        // videoRef.current.play().then(() => {
-        //   setIsLoading(false);
-          
-        //   // Now that the webcam is ready, load the hand pose detection model
-        //   loadHandPoseModel();
-        // }).catch(err => {
-        //   setError("Error initializing video: " + err.message);
-        //   setIsLoading(false);
-        // });
         // After setting videoRef.current.srcObject = stream
         videoRef.current.onloadedmetadata = () => {
             videoRef.current?.play().then(() => {
@@ -107,7 +161,14 @@ export default function WebcamGestureDetector({
       }
     };
 
-    // Function to stop the media stream
+    /**
+     * Stop Stream Function
+     * 
+     * Specifications:
+     * - Properly stops all tracks in the media stream
+     * - Removes stream reference from video element
+     * - Cleans up references to prevent memory leaks
+     */
     const stopStream = () => {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
@@ -134,7 +195,13 @@ export default function WebcamGestureDetector({
   }, [isActive]); // Re-run when isActive changes
 
   /**
-   * Loads the TensorFlow.js hand pose detection model
+   * Load Hand Pose Model Function
+   * 
+   * Specifications:
+   * - Initializes TensorFlow.js environment and sets optimal backend
+   * - Loads the MediaPipe Hands model with configuration for best performance
+   * - Handles errors during model loading
+   * - Starts the prediction loop when model is ready
    */
   const loadHandPoseModel = async () => {
     try {
@@ -177,9 +244,16 @@ export default function WebcamGestureDetector({
   };
   
   /**
-   * Analyzes the hand pose landmarks and classifies the gesture
-   * @param hand - The hand object returned by the hand pose detector
-   * @returns The detected gesture ID or null if no recognizable gesture
+   * Classify Hand Pose Function
+   * 
+   * Specifications:
+   * - Analyzes hand landmark positions to determine gesture type
+   * - Implements rules for identifying thumbs up, down, and sideways gestures
+   * - Considers relative positions of thumb, fingers, and wrist
+   * - Returns the detected gesture ID or null if no recognizable gesture
+   * 
+   * @param hand - The hand object from the MediaPipe Hands model
+   * @returns The detected gesture ID (THUMBS_UP, THUMBS_DOWN, THUMBS_SIDEWAYS, OTHER, or null)
    */
   const classifyHandPose = (hand: handPoseDetection.Hand): GestureId => {
     if (!hand.keypoints || hand.keypoints.length < 21) {
@@ -242,7 +316,15 @@ export default function WebcamGestureDetector({
   };
 
   /**
-   * Starts the continuous loop of hand pose detection
+   * Start Prediction Loop Function
+   * 
+   * Specifications:
+   * - Implements the continuous detection cycle using requestAnimationFrame
+   * - Checks if video and detector are ready before processing
+   * - Performs hand detection on each video frame
+   * - Classifies detected hand poses and reports results via callback
+   * - Handles errors during detection without crashing
+   * - Maintains the loop only while component is active
    */
   const startPredictionLoop = () => {
     // Only start if we have both the video element and the detector
@@ -253,7 +335,17 @@ export default function WebcamGestureDetector({
     const video = videoRef.current;
     const detector = detectorRef.current;
     
-    // Function to run detection on each frame
+    /**
+     * Detect Hand Pose Function
+     * 
+     * Specifications:
+     * - Processes individual video frames to detect hands
+     * - Checks component and resource readiness before processing
+     * - Calls the hand pose classifier on detected hands
+     * - Reports gesture detection results through the callback
+     * - Implements error handling for detection failures
+     * - Maintains the detection loop through requestAnimationFrame
+     */
     const detectHandPose = async () => {
       if (!videoRef.current || !detectorRef.current || !isActive) {
         return;
@@ -291,6 +383,17 @@ export default function WebcamGestureDetector({
     detectHandPose();
   };
 
+  /**
+   * Component Render
+   * 
+   * Specifications:
+   * - Renders appropriate UI feedback based on current detection state
+   * - Shows loading indicators for camera and model initialization
+   * - Displays error messages when detection fails
+   * - Includes a success message when detection is active
+   * - Hides the video element as we don't need to display it to the user
+   * - Maintains consistent styling in both light and dark modes
+   */
   return (
     <div className="webcam-container">
       {isActive && (

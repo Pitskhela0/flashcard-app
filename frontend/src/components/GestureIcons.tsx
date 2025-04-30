@@ -1,3 +1,16 @@
+/**
+ * GestureIcons Component
+ * 
+ * Specifications:
+ * - Provides a collection of SVG icons for the gesture control system
+ * - Implements consistent styling and dimensions across all icons
+ * - Includes icons for: thumbs up, thumbs down, thumbs sideways, camera, camera off, and hand
+ * - Each icon is a functional component that accepts optional className prop for customization
+ * - All icons use the currentColor value to inherit color from parent elements
+ * - Icons maintain accessibility best practices with proper viewBox and dimensions
+ * - SVG paths are optimized for clean rendering at various sizes
+ * - All icons follow a consistent design language
+ */
 import React from 'react';
 
 interface IconProps {

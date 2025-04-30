@@ -1,3 +1,17 @@
+/**
+ * FlashcardDisplay Component
+ * 
+ * Specifications:
+ * - Displays a single flashcard with front and back sides
+ * - Implements a 3D flip animation when transitioning between sides
+ * - Maintains a fixed height container to prevent layout shifts during transitions
+ * - Provides a hint system that fetches additional help for difficult cards
+ * - Handles loading states and errors for hint fetching
+ * - Resets hint state when a new card is displayed
+ * - Supports styling for both light and dark mode
+ * - Front side shows the question/prompt with optional hint
+ * - Back side shows the answer in a visually distinct style (green text)
+ */
 import React, { useEffect, useState } from "react";
 import { Flashcard } from "../types";
 import { fetchHint } from "../services/api";

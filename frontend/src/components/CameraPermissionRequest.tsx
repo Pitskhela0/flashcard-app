@@ -1,3 +1,15 @@
+/**
+ * CameraPermissionRequest Component
+ * 
+ * Specifications:
+ * - Displays a UI element explaining the hand gesture feature and requests camera permission
+ * - Implements an expandable panel with "More/Less" toggle for detailed information
+ * - Shows visual representation of the different hand gestures and their meanings
+ * - Includes privacy information to reassure users about data handling
+ * - Provides a clear call-to-action button for enabling camera access
+ * - Supports both light and dark mode with appropriate styling
+ * - Uses collapsible design to minimize screen space when not expanded
+ */
 import React, { useState } from "react";
 
 interface CameraPermissionRequestProps {

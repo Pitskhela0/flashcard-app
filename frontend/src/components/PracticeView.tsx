@@ -1,3 +1,23 @@
+/**
+ * PracticeView Component
+ * 
+ * Specifications:
+ * - Main container for the flashcard practice experience
+ * - Manages the complete flashcard practice flow including:
+ *   - Loading cards from the API
+ *   - Displaying current card and tracking position in deck
+ *   - Handling user interactions (show answer, submit ratings)
+ *   - Processing hand gestures through the gesture control system
+ *   - Managing camera permissions and setup
+ *   - Providing visual feedback for gesture detection
+ *   - Handling session completion and day advancement
+ * - Implements responsive design that works across device sizes
+ * - Provides loading, error, and success states for all operations
+ * - Displays session progress information (day, card count)
+ * - Supports both gesture-based and button-based rating inputs
+ * - Shows real-time feedback of detected gestures
+ * - Maintains consistent UI in both light and dark modes
+ */
 import React, { useState, useEffect, useCallback } from "react";
 import { Flashcard, AnswerDifficulty, UpdateRequest } from "../types";
 import { fetchPracticeCards, submitAnswer, advanceDay } from "../services/api";
@@ -10,16 +30,51 @@ import {
 import WebcamGestureDetector from "./WebcamgestureDetector";
 import CameraPermissionRequest from "./CameraPermissionRequest";
 
+/**
+ * Thumbs Up Icon Component
+ * 
+ * Specifications:
+ * - Renders an emoji representation of a thumbs up gesture
+ * - Accepts optional className for styling customization
+ * - Used in the gesture feedback UI to indicate "Easy" rating
+ */
 const ThumbsUpIcon = ({ className = "" }: { className?: string }) => (
   <span className={`icon ${className}`}>👍</span>
 );
+
+/**
+ * Thumbs Down Icon Component
+ * 
+ * Specifications:
+ * - Renders an emoji representation of a thumbs down gesture
+ * - Accepts optional className for styling customization
+ * - Used in the gesture feedback UI to indicate "Wrong" rating
+ */
 const ThumbsDownIcon = ({ className = "" }: { className?: string }) => (
   <span className={`icon ${className}`}>👎</span>
 );
+
+/**
+ * Thumbs Side Icon Component
+ * 
+ * Specifications:
+ * - Renders an emoji representation of a thinking face for sideways thumbs
+ * - Accepts optional className for styling customization 
+ * - Used in the gesture feedback UI to indicate "Hard" rating
+ */
 const ThumbsSideIcon = ({ className = "" }: { className?: string }) => (
   <span className={`icon ${className}`}>🤔</span>
 );
 
+/**
+ * Main Practice View Component
+ * 
+ * Specifications:
+ * - Serves as the primary container for flashcard practice functionality
+ * - Manages state for practice cards, current card, answer visibility, and session progress
+ * - Implements camera permission flow and gesture detection integration
+ * - Provides comprehensive UI for card viewing, rating, and gesture feedback
+ */
 export default function PracticeView() {
   const [practiceCards, setPracticeCards] = useState<Flashcard[]>([]);
   const [currentCardIndex, setCurrentCardIndex] = useState<number>(0);
@@ -30,9 +85,16 @@ export default function PracticeView() {
   const [sessionFinished, setSessionFinished] = useState<boolean>(false);
   const [cameraPermissionGranted, setCameraPermissionGranted] = useState<boolean>(false);
 
-
-  
-
+  /**
+   * Handle Gesture Answer
+   * 
+   * Specifications:
+   * - Processes confirmed gestures from the gesture control system
+   * - Maps gesture outcomes to appropriate difficulty ratings
+   * - Triggers the answer submission process when valid gestures are detected
+   * - Handles timeout and null gesture scenarios gracefully
+   * - Includes logging for gesture confirmation debugging
+   */
   const handleGestureAnswer = useCallback(
     (outcome: GestureOutcome) => {
       console.log(`Gesture Confirmed in Component: ${outcome}`);
@@ -67,14 +129,31 @@ export default function PracticeView() {
     [currentCardIndex, practiceCards]
   );
 
+  /**
+   * Gesture Control Hook Integration
+   * 
+   * Specifications:
+   * - Initializes the gesture control system with appropriate configuration
+   * - Only activates gesture processing when card back is shown
+   * - Provides callback for handling confirmed gestures
+   * - Exposes state for UI feedback (confirmed outcome, timeout status, current gesture)
+   */
   const { confirmedOutcome, processDetectedGesture, timeoutNotificationShown, feedbackGesture } =
   useGestureControl({
     isActive: showBack, 
     onGestureConfirmed: handleGestureAnswer,
   });
 
- 
-
+  /**
+   * Load Practice Cards
+   * 
+   * Specifications:
+   * - Fetches the current practice session data from the API
+   * - Manages loading and error states during the fetch operation
+   * - Updates state with fetched cards and current day information
+   * - Handles empty card sets by showing session completion UI
+   * - Resets session state when reloading cards
+   */
   const loadPracticeCards = async () => {
     setIsLoading(true);
     setError(null);
@@ -91,13 +170,35 @@ export default function PracticeView() {
     }
   };
 
+  /**
+   * Initial Load Effect
+   * 
+   * Specifications:
+   * - Triggers the loading of practice cards when the component mounts
+   * - Runs only once during component initialization
+   */
   useEffect(() => {
     loadPracticeCards();
   }, []);
 
+  /**
+   * Handle Show Back
+   * 
+   * Specifications:
+   * - Reveals the back (answer) side of the current flashcard
+   * - Simple toggle function that updates the showBack state
+   */
   const handleShowBack = () => setShowBack(true);
 
-  // Add a function to handle camera permission request
+  /**
+   * Handle Request Camera Permission
+   * 
+   * Specifications:
+   * - Requests access to the user's camera via browser media API
+   * - Updates permission state based on user's response
+   * - Properly cleans up media streams after permission check
+   * - Handles permission denial with appropriate error logging
+   */
   const handleRequestCameraPermission = () => {
     // This will trigger the browser's permission dialog
     navigator.mediaDevices.getUserMedia({ video: true })
@@ -114,6 +215,17 @@ export default function PracticeView() {
       });
   };
 
+  /**
+   * Handle Answer
+   * 
+   * Specifications:
+   * - Processes user ratings for the current flashcard
+   * - Submits the rating to the API with appropriate card information
+   * - Advances to the next card when submission is successful
+   * - Sets session completion when all cards have been rated
+   * - Handles errors during the submission process
+   * - Uses callback pattern for proper dependency management
+   */
   const handleAnswer = useCallback(
     async (difficulty: AnswerDifficulty) => {
       if (!practiceCards[currentCardIndex]) {
@@ -141,6 +253,15 @@ export default function PracticeView() {
     [currentCardIndex, practiceCards]
   );
 
+  /**
+   * Handle Next Day
+   * 
+   * Specifications:
+   * - Advances the practice session to the next day via API
+   * - Resets the current session state (card index, card visibility)
+   * - Triggers loading of new practice cards for the next day
+   * - Handles errors during the day advancement process
+   */
   const handleNextDay = async () => {
     try {
       await advanceDay();
@@ -152,10 +273,20 @@ export default function PracticeView() {
     }
   };
 
+  /**
+   * Loading State Render
+   */
   if (isLoading)
     return <div className="text-center text-gray-600">Loading...</div>;
+  
+  /**
+   * Error State Render
+   */
   if (error) return <div className="text-center text-red-500">{error}</div>;
 
+  /**
+   * Session Finished State Render
+   */
   if (sessionFinished) {
     return (
       <div className="p-6 text-center bg-white dark:bg-gray-800 shadow-lg rounded-xl max-w-md mx-auto">
@@ -174,6 +305,9 @@ export default function PracticeView() {
 
   const currentCard = practiceCards[currentCardIndex];
 
+  /**
+   * Main Practice Interface Render
+   */
   return (
     <div className="w-full bg-gray-50 dark:bg-gray-900 flex items-start justify-center px-4 py-8">
       <div className="p-6 w-full max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-md space-y-6">
@@ -217,9 +351,7 @@ export default function PracticeView() {
                 />
               )}
 
-              {/* ================================================= */}
-              {/* START: ADD GESTURE FEEDBACK UI HERE */}
-              {/* ================================================= */}
+              {/* Gesture Feedback UI */}
               <div className="gesture-feedback my-4 p-3 border border-dashed border-gray-300 dark:border-gray-600 rounded-md text-center">
                 <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   Gesture Rating
@@ -252,15 +384,9 @@ export default function PracticeView() {
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   Hold gesture for ~1s
                 </p>
-                {/* Optional: Display raw feedback for debugging
-                 <p className="text-xs text-gray-400 mt-1">Feedback: {feedbackGesture ?? 'None'}</p>
-                 */}
               </div>
-              {/* ================================================= */}
-              {/* END: ADD GESTURE FEEDBACK UI HERE */}
-              {/* ================================================= */}
 
-              {/* Existing Answer Buttons */}
+              {/* Answer Buttons */}
               <button
                 onClick={() => handleAnswer(AnswerDifficulty.Easy)}
                 className="w-full py-2 bg-green-500 hover:bg-green-600 text-white font-medium rounded-lg shadow transition"

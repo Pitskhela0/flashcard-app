@@ -30,6 +30,9 @@ export default function PracticeView() {
   const [sessionFinished, setSessionFinished] = useState<boolean>(false);
   const [cameraPermissionGranted, setCameraPermissionGranted] = useState<boolean>(false);
 
+
+  
+
   const handleGestureAnswer = useCallback(
     (outcome: GestureOutcome) => {
       console.log(`Gesture Confirmed in Component: ${outcome}`);
@@ -64,11 +67,13 @@ export default function PracticeView() {
     [currentCardIndex, practiceCards]
   );
 
-  const { processDetectedGesture, timeoutNotificationShown, feedbackGesture } =
-    useGestureControl({
-      isActive: showBack, 
-      onGestureConfirmed: handleGestureAnswer,
-    });
+  const { confirmedOutcome, processDetectedGesture, timeoutNotificationShown, feedbackGesture } =
+  useGestureControl({
+    isActive: showBack, 
+    onGestureConfirmed: handleGestureAnswer,
+  });
+
+ 
 
   const loadPracticeCards = async () => {
     setIsLoading(true);

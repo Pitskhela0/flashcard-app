@@ -79,16 +79,27 @@ export default function WebcamGestureDetector({
         // Attach the stream to the video element
         videoRef.current.srcObject = stream;
         
-        // Play the video
-        videoRef.current.play().then(() => {
-          setIsLoading(false);
+        // // Play the video
+        // videoRef.current.play().then(() => {
+        //   setIsLoading(false);
           
-          // Now that the webcam is ready, load the hand pose detection model
-          loadHandPoseModel();
-        }).catch(err => {
-          setError("Error initializing video: " + err.message);
-          setIsLoading(false);
-        });
+        //   // Now that the webcam is ready, load the hand pose detection model
+        //   loadHandPoseModel();
+        // }).catch(err => {
+        //   setError("Error initializing video: " + err.message);
+        //   setIsLoading(false);
+        // });
+        // After setting videoRef.current.srcObject = stream
+        videoRef.current.onloadedmetadata = () => {
+            videoRef.current?.play().then(() => {
+            setIsLoading(false);
+            loadHandPoseModel();
+            }).catch(err => {
+            setError("Error initializing video: " + err.message);
+            setIsLoading(false);
+            });
+        };
+  
       } catch (err) {
         // Handle errors when camera access is denied or not available
         setError("Could not access camera. Please check permissions.");

@@ -23,7 +23,7 @@ interface UseGestureControlReturn {
   feedbackGesture: GestureId;
   // We'll add more return values later for feedback (P3.6b)
 }
-const DEFAULT_HOLD_DURATION_MS = 750;
+const DEFAULT_HOLD_DURATION_MS = 1500;
 const DEFAULT_OVERALL_TIMEOUT_MS = 8000;
 
 /**
@@ -109,43 +109,44 @@ export const useGestureControl = ({
 
   const processDetectedGesture = useCallback(
     (detectedGesture: GestureId) => {
-      if (!isActive) {
-        return;
-      }
-
-      if (confirmationTimerRef.current) {
-        clearTimeout(confirmationTimerRef.current);
-        confirmationTimerRef.current = null;
-      }
-
+      console.log("processing gesture", detectedGesture);
+  
+      if (!isActive) return;
+  
+      // Only act if the gesture changed
       if (detectedGesture !== currentGestureRef.current) {
-        setConfirmedOutcome(null);
-      }
-
-      currentGestureRef.current = detectedGesture;
-      setFeedbackGesture(detectedGesture);
-
-      if (detectedGesture !== null && detectedGesture !== "OTHER") {
+        // Update gesture state
+        currentGestureRef.current = detectedGesture;
+        setFeedbackGesture(detectedGesture);
         setGestureStartTime(Date.now());
-
-        confirmationTimerRef.current = setTimeout(() => {
-          if (currentGestureRef.current === detectedGesture) {
-            const outcome = getOutcomeForGesture(detectedGesture);
-
-            setConfirmedOutcome(outcome);
-
-            clearOverallTimer();
-
-            onGestureConfirmed(outcome);
-          }
+        setConfirmedOutcome(null); // Reset confirmation state
+  
+        // Clear any existing timer
+        if (confirmationTimerRef.current) {
+          clearTimeout(confirmationTimerRef.current);
           confirmationTimerRef.current = null;
-        }, holdDurationMs);
-      } else {
-        setGestureStartTime(null);
+        }
+  
+        // Only start timer if gesture is valid
+        if (detectedGesture !== null && detectedGesture !== "OTHER") {
+          confirmationTimerRef.current = setTimeout(() => {
+            if (currentGestureRef.current === detectedGesture) {
+              const outcome = getOutcomeForGesture(detectedGesture);
+              setConfirmedOutcome(outcome);
+              clearOverallTimer();
+              onGestureConfirmed(outcome);
+            }
+            confirmationTimerRef.current = null;
+          }, holdDurationMs);
+        } else {
+          setGestureStartTime(null);
+        }
       }
+      // else: gesture is same as before, do nothing (don’t reset timer)
     },
-    [isActive, holdDurationMs, clearOverallTimer, onGestureConfirmed]
-  ); // Dependencies for useCallback
+    [isActive, onGestureConfirmed, holdDurationMs, clearOverallTimer]
+  );
+  
 
   return {
     confirmedOutcome,

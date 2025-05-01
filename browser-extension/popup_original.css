@@ -52,14 +52,13 @@ body {
   
   /* Button Styling */
   .button-group {
-    display: flex; /* Use flexbox for button alignment */
-    justify-content: space-between; /* Space buttons evenly */
-    margin-top: 20px; /* Space above the buttons */
+    text-align: center; /* Center the button */
+    margin-top: 20px; /* Space above the button */
   }
   
   button {
-    padding: 10px 15px; /* Button padding */
-    font-size: 0.9em;
+    padding: 10px 20px; /* Button padding */
+    font-size: 1em;
     font-weight: bold;
     color: #fff; /* White text */
     background-color: #007bff; /* Bootstrap blue */
@@ -67,8 +66,6 @@ body {
     border-radius: 5px; /* Rounded corners */
     cursor: pointer; /* Pointer cursor on hover */
     transition: background-color 0.2s ease; /* Smooth hover effect */
-    flex: 1; /* Make buttons take equal space */
-    margin: 0 5px; /* Add spacing between buttons */
   }
   
   /* Button Hover State (only when not disabled) */
@@ -76,27 +73,13 @@ body {
     background-color: #0056b3; /* Darker blue */
   }
   
-  /* Specific styling for AI Generator button */
-  #ai-generator-button {
-    background-color: #28a745; /* Green for the AI button */
-  }
-  
-  #ai-generator-button:hover:not(:disabled) {
-    background-color: #218838; /* Darker green on hover */
-  }
-  
-  #ai-generator-button:disabled {
-    background-color: #8bc8a4; /* Lighter green when disabled */
-    cursor: not-allowed;
-  }
-  
-  /* Button Disabled State */
+  /* Button Disabled State (will be used in P2.6) */
   button:disabled {
     background-color: #ccc; /* Grey background */
     cursor: not-allowed; /* Indicate it's not clickable */
   }
   
-  /* Message Area Styling */
+  /* Message Area Styling (for P2.8) */
   #message-area {
     margin-top: 15px;
     padding: 10px;
@@ -110,7 +93,7 @@ body {
     color: inherit;
   }
   
-  /* Specific styles for success/error messages */
+  /* Specific styles for success/error messages (add class via JS later) */
   #message-area.success {
     background-color: #d4edda; /* Light green */
     color: #155724; /* Dark green text */
@@ -121,11 +104,4 @@ body {
     background-color: #f8d7da; /* Light red */
     color: #721c24; /* Dark red text */
     border: 1px solid #f5c6cb;
-  }
-  
-  /* Processing state for messages */
-  #message-area.processing {
-    background-color: #e2f0fd; /* Light blue */
-    color: #0c5460; /* Dark blue text */
-    border: 1px solid #bee5eb;
   }

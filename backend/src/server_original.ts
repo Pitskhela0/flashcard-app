@@ -1,10 +1,5 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
-import axios from "axios"; // installed
-import dotenv from 'dotenv';
-// Load environment variables from .env file
-dotenv.config();
-
 
 import {
   toBucketSets,
@@ -31,18 +26,6 @@ interface UpdateRequestBody {
   cardBack: string;
   difficulty: AnswerDifficulty;
 }
-
-interface GenerateRequestBody {
-  prompt: string;
-}
-
-interface GenerateResponseBody {
-  back: string;
-  hint: string;
-}
-
-// API key for OpenAI - store in environment variables in production
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 export const app = express();
 
@@ -96,110 +79,6 @@ app.post("/api/flashcards", (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
-
-/**
- * flashcard generation endpoint
- * that directly mirrors the successful test script structure.
- */
-app.post("/api/generate", (req: Request, res: Response) => {
-    (async () => {
-      try {
-        const { prompt } = req.body;
-        
-        if (!prompt || typeof prompt !== "string" || prompt.trim() === "") {
-          return res.status(400).json({ error: "A valid prompt is required" });
-        }
-  
-        console.log(`[Generate] Processing prompt: "${prompt.substring(0, 30)}${prompt.length > 30 ? '...' : ''}"`);
-        
-        // Use axios to call OpenAI API - matching the structure of the successful test
-        const openaiResponse = await axios.post(
-          'https://api.openai.com/v1/chat/completions',
-          {
-            model: "gpt-3.5-turbo",
-            messages: [
-              {
-                role: "system",
-                content: "You are a helpful flashcard creator. Generate concise content for the back of a flashcard and a hint based on the front text. The back should clearly explain the concept, and the hint should give a clue without revealing the answer."
-              },
-              {
-                role: "user",
-                content: `Generate flashcard content for: "${prompt}". Return JSON with "back" and "hint" fields.`
-              }
-            ],
-            temperature: 0.7
-          },
-          {
-            headers: {
-              'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-              'Content-Type': 'application/json'
-            }
-          }
-        );
-  
-        // Extract the content from the response
-        const messageContent = openaiResponse.data.choices[0].message.content;
-        console.log("Raw API response content:", messageContent);
-        
-        // Try to parse the content as JSON
-        let contentObj;
-        try {
-          // Check if the content is already JSON or needs parsing
-          if (typeof messageContent === 'string') {
-            // Look for JSON object in the string - handles cases where model might include commentary
-            const jsonMatch = messageContent.match(/\{[\s\S]*\}/);
-            if (jsonMatch) {
-              contentObj = JSON.parse(jsonMatch[0]);
-            } else {
-              throw new Error("Could not find JSON object in response");
-            }
-          } else {
-            contentObj = messageContent;
-          }
-          
-          // Validate the parsed content
-          if (!contentObj.back) {
-            contentObj.back = "Explanation: " + prompt;
-          }
-          if (!contentObj.hint) {
-            contentObj.hint = "Think about the key concepts related to this topic.";
-          }
-          
-        } catch (parseError) {
-          console.error("Failed to parse JSON from API response:", parseError);
-          console.log("Attempting to extract content manually");
-          
-          // Fallback: Manually extract content if JSON parsing fails
-          const backMatch = messageContent.match(/back["']?\s*:\s*["']([^"']+)["']/i);
-          const hintMatch = messageContent.match(/hint["']?\s*:\s*["']([^"']+)["']/i);
-          
-          contentObj = {
-            back: backMatch ? backMatch[1] : "Explanation: " + prompt,
-            hint: hintMatch ? hintMatch[1] : "Consider the key concepts in this topic."
-          };
-        }
-        
-        console.log("[Generate] Successfully generated content");
-        
-        // Return the processed content
-        res.json({
-          back: contentObj.back,
-          hint: contentObj.hint
-        });
-        
-      } catch (error: any) {
-        console.error("OpenAI API error:", error);
-        console.error("Error details:", error.response?.data || error.message);
-        
-        res.status(502).json({ 
-          error: "Failed to generate content from AI service",
-          details: error.response?.data?.error?.message || error.message
-        });
-      }
-    })();
-  });
-
-
 
 app.get("/api/practice", (req, res) => {
   try {

@@ -48,3 +48,23 @@ export interface PracticeRecord {
   previousBucket: number;
   newBucket: number;
 }
+
+/**
+ * Interface for AI content generation request
+ * Represents the data sent to the AI generation endpoint
+ */
+export interface GenerateRequestBody {
+  /** The text from the front of the flashcard to use as a prompt */
+  prompt: string;
+}
+
+/**
+ * Interface for AI content generation response
+ * Represents the data returned from the AI generation endpoint
+ */
+export interface GenerateResponseBody {
+  /** The generated content for the back of the flashcard */
+  back: string;
+  /** The generated hint for the flashcard */
+  hint: string;
+}

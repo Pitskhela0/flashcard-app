@@ -29,7 +29,7 @@ import {
  * - Base URL for all API requests
  * - Can be configured for different environments (dev, test, prod)
  */
-const API_BASE_URL = "http://localhost:3001/api";
+const API_BASE_URL = "http://56.228.27.159:3000/api";
 
 /**
  * API Client Instance

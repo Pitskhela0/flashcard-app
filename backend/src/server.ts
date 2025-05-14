@@ -26,6 +26,13 @@ import {
 import { AnswerDifficulty, Flashcard } from "./logic/flashcards";
 import { FlashcardInterface, PracticeRecord } from "./types";
 
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Get the directory name in ES modules (equivalent to __dirname in CommonJS)
+
+
+
 interface UpdateRequestBody {
   cardFront: string;
   cardBack: string;
@@ -303,7 +310,39 @@ app.post("/api/day/next", (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to advance day." });
   }
 });
+// Make sure you have body parsing middleware enabled
+app.use(express.json());
+
+// Variable to store the most recent data
+let mostRecentData = "";
+
+// Endpoint to receive data
+app.post('/api/create-answer', (req, res) => {
+  const { data } = req.body;
+  
+  if (data) {
+    // Store the data
+    mostRecentData = data;
+    console.log("Received data:", data);
+    res.status(200).json({ success: true, message: "Data received" });
+  } else {
+    res.status(400).json({ success: false, message: "No data provided" });
+  }
+});
+
+// Endpoint to get the most recent data
+app.get('/api/get-answer', (req, res) => {
+  res.status(200).json({ data: mostRecentData });
+});
+
+
+
+// Handle all frontend routes (if needed)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../frontend/dist/index.html'));
+});
+
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server is running on http://localhost:${PORT}`);
+  console.log(`🚀 Server is running on http://0.0.0.0:${PORT}`);
 });
